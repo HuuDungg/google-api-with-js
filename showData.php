@@ -61,6 +61,15 @@ function transformData($data) {
 
 
 $tasks = transformData($data);
+$total_time = 0;
+foreach ($tasks as $task) {
+    foreach ($task['details'] as $detail) {
+        $total_time += $detail['time'];
+    }
+}
+
+// Xác định số ngày tối đa
+$max_days = ceil($total_time / 8);
 
 ?>
 
@@ -72,25 +81,7 @@ $tasks = transformData($data);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" href="/traingoogleapi/css/style.css">
-    <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: center;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        .random-color {
-            background-color: #<?php echo substr(md5(rand()), 0, 6); ?>
-        }
-        td.empty {
-            background-color: #f9f9f9;
-        }
+
     </style>
 </head>
 <body>
@@ -100,63 +91,72 @@ $tasks = transformData($data);
                 <th rowspan="2">No</th>
                 <th rowspan="2">Task</th>
                 <th rowspan="2">Estimated time (hours)</th>
-                <th colspan="7">Day</th>
+                <th colspan="<?php echo $max_days ?>">Day</th>
             </tr>
             <tr>
-                <th>1</th>
-                <th>2</th>
-                <th>3</th>
-                <th>4</th>
-                <th>5</th>
-                <th>6</th>
-                <th>7</th>
+            <?php for ($day = 1; $day <= $max_days; $day++): ?>
+                    <th><?= $day ?></th>
+                <?php endfor; ?>
             </tr>
         </thead>
         <tbody>
-            <?php
-               $total_time = 0;
-               $tmp_time = 0;
-            ?>
-            <?php foreach ($tasks as $task): ?>
-                <?php foreach ($task['details'] as $index => $detail): ?>
-                    <?php
-                        $total_time += $detail['time'];
-                        $td_number = $total_time / 8;
+        <?php
+        $total_time = 0; // Tổng thời gian của tất cả chi tiết
+        $tmp_time = 0; // Tổng thời gian tạm thời cho các chi tiết trong một hàng
+        ?>
+        <?php foreach ($tasks as $task): ?>
+            <?php foreach ($task['details'] as $index => $detail): ?>
+                <?php
+                $total_time += $detail['time']; // Cộng dồn thời gian chi tiết vào tổng thời gian
+                $td_number = ceil($total_time / 8); // Xác định ngày dựa trên tổng thời gian
 
-                        $tmp_time += $detail['time'];
-                        $colspan = ceil($tmp_time / 8);
-                        if ($colspan > 1) {
-                            $colspan = 2;
-                            $td_number =  $td_number - 1;
-                            $tmp_time =  fmod($tmp_time, 8);
-                        }
-                    ?>
+                $tmp_time += $detail['time']; // Cộng dồn thời gian chi tiết vào thời gian tạm thời
+                $colspan = ceil($tmp_time / 8); // Xác định kích thước cột dựa trên thời gian tạm thời
+                if ($colspan > 1) {
+                    $colspan = 2; // Nếu kích thước cột lớn hơn 1, đặt lại là 2 (giới hạn tối đa)
+                    $td_number = $td_number - 1; // Điều chỉnh lại số ngày
+                    $tmp_time = fmod($tmp_time, 8); // Lấy phần dư của thời gian tạm thời cho lần tính toán tiếp theo
+                }
 
-                    <tr>
-                        <?php if ($index === 0): ?>
-                            <td rowspan="<?= count($task['details']) ?>"><?= $task['no'] ?></td>
-                            <td rowspan="<?= count($task['details']) ?>"><?= $task['task'] ?></td>
-                            <td rowspan="<?= count($task['details']) ?>"><?= $task['time'] ?></td>
-                        <?php endif; ?>
+                // Số lượng ô trống cần thiết để điền cho ngày sau khi dữ liệu chi tiết đã hết
+                $total_days = $max_days;
+                $current_day = $td_number + $colspan;
+                $empty_cells = $total_days - $current_day;
+                ?>
 
-                        <!-- Hiển thị thời gian chi tiết -->
-                        <td><?= $detail['time'] ?></td>
+                <tr>
+                    <?php if ($index === 0): ?>
+                        <td rowspan="<?= count($task['details']) ?>"><?= $task['no'] ?></td>
+                        <td rowspan="<?= count($task['details']) ?>"><?= $task['task'] ?></td>
+                        <td rowspan="<?= count($task['details']) ?>"><?= $task['time'] ?></td>
+                    <?php endif; ?>
 
-                        <!-- Các ô trống -->
-                        <?php for ($i = 1; $i < $td_number; $i++): ?>
-                            <td class="empty"></td>
-                        <?php endfor; ?>
 
-                        <!-- Ô dữ liệu -->
-                        <td style="background-color: #<?php echo substr(md5(rand()), 0, 6); ?>" class="<?= $detail['class'] ?>" colspan="<?php echo $colspan; ?>">
-                            <?= $detail['desc'] ?>
-                        </td>
-                        
-                    </tr>
+                    <!-- Các ô trống trước ô dữ liệu -->
+                    <?php for ($i = 1; $i < $td_number; $i++): ?>
+                        <td class="empty"></td>
+                    <?php endfor; ?>
 
-                <?php endforeach; ?>
+                    <!-- Ô dữ liệu -->
+                    <td style="background-color: #<?php echo substr(md5(rand()), 0, 6); ?>" class="<?= $detail['class'] ?>" colspan="<?php echo $colspan; ?>">
+                        <?= $detail['desc'] ?>
+                    </td>
+
+                    <!-- Các ô trống sau ô dữ liệu -->
+                    <?php for ($i = 0; $i <= $empty_cells; $i++): ?>
+                        <td class="empty"></td>
+                    <?php endfor; ?>
+
+                </tr>
+
             <?php endforeach; ?>
+        <?php endforeach; ?>
         </tbody>
+    </table>
+    <script src="/traingoogleapi/js/main.js"></script>
+</body>
+
+
     </table>
 </body>
 </html>

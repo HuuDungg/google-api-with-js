@@ -118,14 +118,12 @@ async function pickerCallback(data) {
 
     // Đọc dữ liệu từ file Google Sheets
     const spreadsheetId = fileId;
-    const range = 'ETA assumption!C3:M38'; // Phạm vi dữ liệu bạn muốn đọc
+    const range = ' ETAassumption!C3:M30'; // Phạm vi dữ liệu bạn muốn đọc
     await readDataSheet(spreadsheetId, range);
   }
 }
 
-function chooseShet(){
-  
-}
+
 
 async function readDataSheet(spreadsheetId, range) {
   try {
@@ -163,8 +161,3 @@ function sendData(data) {
   document.body.appendChild(form);
   form.submit();
 }
-
-
-
-
-
