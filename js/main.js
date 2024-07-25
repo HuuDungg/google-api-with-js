@@ -31,6 +31,7 @@
    */
   async function initializePicker() {
     await gapi.client.load('https://www.googleapis.com/discovery/v1/apis/drive/v3/rest');
+    await gapi.client.load('https://www.googleapis.com/discovery/v1/apis/sheets/v4/rest'); // Tải Google Sheets API
     pickerInited = true;
     maybeEnableButtons();
   }
@@ -101,30 +102,69 @@
         .build();
     picker.setVisible(true);
   }
+async function pickerCallback(data) {
+  if (data[google.picker.Response.ACTION] === google.picker.Action.PICKED) {
+    let text = `Picker response: \n${JSON.stringify(data, null, 2)}\n`;
+    const document = data[google.picker.Response.DOCUMENTS][0];
+    const fileId = document[google.picker.Document.ID];
+    console.log(fileId);
 
-  async function pickerCallback(data) {
-    if (data[google.picker.Response.ACTION] === google.picker.Action.PICKED) {
-      let text = `Picker response: \n${JSON.stringify(data, null, 2)}\n`;
-      const document = data[google.picker.Response.DOCUMENTS][0];
-      const fileId = document[google.picker.Document.ID];
-      
-      // Lấy thông tin về file từ Drive API
-      const res = await gapi.client.drive.files.get({
-        'fileId': fileId,
-        'fields': '*',
-      });
-      text += `Drive API response for first document: \n${JSON.stringify(res.result, null, 2)}\n`;
-      
-      // Đọc dữ liệu từ Google Sheets
-      const sheetId = fileId;
-      const range = 'Sheet1!A1:D10'; // Thay đổi phạm vi ô theo nhu cầu của bạn
-      const sheetData = await gapi.client.sheets.spreadsheets.values.get({
-        spreadsheetId: sheetId,
-        range: range,
-      });
-      
-      text += `Google Sheets API response: \n${JSON.stringify(sheetData.result, null, 2)}\n`;
-      window.document.getElementById('content').innerText = text;
-    }
+    // Lấy thông tin file từ Google Drive
+    const res = await gapi.client.drive.files.get({
+      'fileId': fileId,
+      'fields': '*',
+    });
+    text += `Drive API response for first document: \n${JSON.stringify(res.result, null, 2)}\n`;
+
+    // Đọc dữ liệu từ file Google Sheets
+    const spreadsheetId = fileId;
+    const range = 'ETA assumption!C3:M38'; // Phạm vi dữ liệu bạn muốn đọc
+    await readDataSheet(spreadsheetId, range);
   }
+}
+
+function chooseShet(){
+  
+}
+
+async function readDataSheet(spreadsheetId, range) {
+  try {
+    const response = await gapi.client.sheets.spreadsheets.values.get({
+      spreadsheetId: spreadsheetId,
+      range: range,
+    });
+    const data = response.result.values;
+    console.log(data);
+    await sendData(data); // Gửi dữ liệu đến PHP
+
+  } catch (error) {
+    console.error('Error reading data from sheet:', error);
+    window.document.getElementById('content').innerText = 'Error reading data from sheet.';
+  }
+}
+
+function sendData(data) {
+
+  // Chuyển đổi dữ liệu thành chuỗi JSON
+  const jsonData = JSON.stringify(data);
+
+  // Tạo một form ẩn để gửi dữ liệu
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = 'http://localhost/traingoogleapi/showData.php';
+
+  // Tạo một input hidden để chứa dữ liệu JSON
+  const input = document.createElement('input');
+  input.type = 'hidden';
+  input.name = 'data';
+  input.value = jsonData;
+
+  form.appendChild(input);
+  document.body.appendChild(form);
+  form.submit();
+}
+
+
+
+
 

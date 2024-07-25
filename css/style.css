@@ -1,14 +1,126 @@
 body {
     font-family: Arial, sans-serif;
-    margin: 20px;
 }
 
-button {
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
+table.timeline {
+    width: 100%;
+    border-collapse: collapse;
 }
 
-#output {
-    margin-top: 20px;
+table.timeline th, table.timeline td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
 }
+
+table.timeline th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+    text-align: center;
+}
+
+.page-load {
+    background-color: #d9b3ff;
+    text-align: center;
+}
+
+.server-response {
+    background-color: #ff9999;
+    text-align: center;
+}
+
+.asset-analysis {
+    background-color: #d2b48c;
+    text-align: center;
+}
+
+.meta-tags {
+    background-color: #ffd9b3;
+    text-align: center;
+}
+
+.url-structure {
+    background-color: #d9b3ff;
+    text-align: center;
+}
+
+.sitemap {
+    background-color: #ff9999;
+    text-align: center;
+}
+
+.on-page-seo {
+    background-color: #d2b48c;
+    text-align: center;
+}
+
+.https {
+    background-color: #ffd9b3;
+    text-align: center;
+}
+
+.vulnerability {
+    background-color: #d9b3ff;
+    text-align: center;
+}
+
+.secure-coding {
+    background-color: #ff9999;
+    text-align: center;
+}
+
+.navigation {
+    background-color: #d2b48c;
+    text-align: center;
+}
+
+.mobile-responsiveness {
+    background-color: #ffd9b3;
+    text-align: center;
+}
+
+.accessibility {
+    background-color: #d9b3ff;
+    text-align: center;
+}
+
+.content-layout {
+    background-color: #ff9999;
+    text-align: center;
+}
+
+.code-structure {
+    background-color: #d9b3ff;
+    text-align: center;
+}
+
+.next-js {
+    background-color: #ff9999;
+    text-align: center;
+}
+
+.linting {
+    background-color: #d2b48c;
+    text-align: center;
+}
+
+.dependency-management {
+    background-color: #ffd9b3;
+    text-align: center;
+}
+
+.core-features {
+    background-color: #d9b3ff;
+    text-align: center;
+}
+
+.third-party {
+    background-color: #ff9999;
+    text-align: center;
+}
+
+.api {
+    background-color: #d2b48c;
+    text-align: center;
+}
+
