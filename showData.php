@@ -71,6 +71,53 @@ foreach ($tasks as $task) {
 // Xác định số ngày tối đa
 $max_days = ceil($total_time / 8);
 
+
+
+function sendArrayToServer($dataArray) {
+    $url = 'http://localhost:3000/api/data'; // URL của API
+
+    // Chuyển đổi mảng dữ liệu thành JSON
+    $jsonData = json_encode($dataArray);
+    if ($jsonData === false) {
+        echo 'Lỗi khi chuyển đổi dữ liệu sang JSON: ' . json_last_error_msg();
+        return;
+    }
+
+    // Khởi tạo cURL
+    $ch = curl_init($url);
+
+    // Cấu hình cURL
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Nhận kết quả dưới dạng chuỗi
+    curl_setopt($ch, CURLOPT_POST, true); // Phương thức POST
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData); // Dữ liệu gửi đi
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json', // Đặt kiểu nội dung là JSON
+        'Content-Length: ' . strlen($jsonData) // Độ dài của dữ liệu JSON
+    ]);
+
+    // Gửi yêu cầu và nhận phản hồi
+    $response = curl_exec($ch);
+
+    // Kiểm tra lỗi cURL
+    if (curl_errno($ch)) {
+        echo 'cURL Error: ' . curl_error($ch);
+        curl_close($ch);
+        return;
+    }
+
+    // Kiểm tra mã HTTP trả về
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+
+    // Đóng cURL
+    curl_close($ch);
+}
+
+
+// Chuyển đổi dữ liệu và gửi tới server
+$tasks = transformData($data);
+sendArrayToServer($tasks);
+
 ?>
 
 
@@ -160,3 +207,5 @@ $max_days = ceil($total_time / 8);
     </table>
 </body>
 </html>
+
+
